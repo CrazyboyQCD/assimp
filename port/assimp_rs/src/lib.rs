@@ -7,11 +7,10 @@ pub mod postprocess;
 pub mod shims;
 pub mod socket;
 pub mod structs;
+pub mod traits;
+pub(crate) mod utils;
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(true, true);
-    }
-}
+#[cfg(feature = "double_precision")]
+pub type AiReal = f64;
+#[cfg(not(feature = "double_precision"))]
+pub type AiReal = f32;

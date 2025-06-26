@@ -1,0 +1,48 @@
+use thiserror::Error;
+
+/// Encoding conversion errors
+#[derive(Debug, Error)]
+pub enum EncodingError {
+    #[error("Not valid UTF-32 BE")]
+    NotValidUtf32Be,
+
+    #[error("Not valid UTF-32 LE")]
+    NotValidUtf32Le,
+
+    #[error("Not valid UTF-16 length: {0}")]
+    NotValidUtf16Length(usize),
+
+    #[error("Not valid UTF-16 BE")]
+    NotValidUtf16Be,
+
+    #[error("Not valid UTF-16 LE")]
+    NotValidUtf16Le,
+
+    #[error("Not valid UTF-8")]
+    NotValidUtf8,
+
+    #[error("Not valid code point: {0}")]
+    NotValidCodePoint(u32),
+
+    #[error("Unknown encoding")]
+    UnknownEncoding,
+}
+
+/// General import errors
+#[derive(Debug, Error)]
+pub enum ImportError {
+    #[error("File is too small")]
+    TooSmall,
+
+    #[error("Encoding error: {0}")]
+    EncodingError(#[from] EncodingError),
+
+    #[error("IO error: {0}")]
+    IoError(#[from] std::io::Error),
+
+    #[error("Not a valid format")]
+    InvalidFormat,
+
+    #[error("Parse error")]
+    ParseError,
+}
