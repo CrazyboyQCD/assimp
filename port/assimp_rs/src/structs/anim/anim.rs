@@ -1,44 +1,94 @@
-pub struct Animation<'mA, 'mMA, 'nA> {
-    /* The name of the animation. If the modeling package this data was
-     * exported from does support only a single animation channel, this
-     * name is usually empty (length is zero).
-     */
-    m_name: Option<String>,
-    // Duration of the animation in ticks
-    m_duration: f64,
-    // Ticks per second. Zero (0.000... ticks/second) if not
-    // specified in the imported file
-    m_ticks_per_second: Option<f64>,
-    /* Number of bone animation channels.
-       Each channel affects a single node.
-       */
-    m_num_channels: u64,
-    /* Node animation channels. Each channel
-       affects a single node. 
-       ?? -> The array is m_num_channels in size.
-       (maybe refine to a derivative type of usize?)
-       */
-    m_channels: &'nA NodeAnim,
-    /* Number of mesh animation channels. Each
-       channel affects a single mesh and defines
-       vertex-based animation.
-       */
-    m_num_mesh_channels: u64,
-    /* The mesh animation channels. Each channel
-       affects a single mesh.
-       The array is m_num_mesh_channels in size
-       (maybe refine to a derivative of usize?)
-       */
-    m_mesh_channels: &'mA MeshAnim,
-    /* The number of mesh animation channels. Each channel
-       affects a single mesh and defines some morphing animation.
-       */
-    m_num_morph_mesh_channels: u64,
-    /* The morph mesh animation channels. Each channel affects a single mesh.
-       The array is mNumMorphMeshChannels in size.
-       */
-    m_morph_mesh_channels: &'mMA MeshMorphAnim    
+use crate::structs::key::{AiMeshMorphKey, AiQuatKey, AiVectorKey};
+
+// ---------------------------------------------------------------------------
+/** Binds a anim-mesh to a specific point in time. */
+#[derive(Debug, Clone, Default)]
+pub struct AiMeshKey {
+    /** The time of this key */
+    pub time: f64,
+
+    /** Index into the aiMesh::mAnimMeshes array of the
+     *  mesh corresponding to the #aiMeshAnim hosting this
+     *  key frame. The referenced anim mesh is evaluated
+     *  according to the rules defined in the docs for #aiAnimMesh.*/
+    pub value: u32,
 }
-pub struct NodeAnim {}
-pub struct MeshAnim {}
-pub struct MeshMorphAnim {}
+
+// ---------------------------------------------------------------------------
+/** Defines how an animation channel behaves outside the defined time
+ *  range. This corresponds to aiNodeAnim::mPreState and
+ *  aiNodeAnim::mPostState.*/
+#[derive(Debug, Clone, Copy, Default)]
+pub enum AiAnimBehaviour {
+    /** The value from the default node transformation is taken*/
+    #[default]
+    Default = 0x0,
+
+    /** The nearest key value is used without interpolation */
+    Constant = 0x1,
+
+    /** The value of the nearest two keys is linearly
+     *  extrapolated for the current time value.*/
+    Linear = 0x2,
+
+    /** The animation is repeated.
+     *
+     *  If the animation key go from n to m and the current
+     *  time is t, use the value at (t-n) % (|m-n|).*/
+    Repeat = 0x3,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct AiNodeAnim {
+    /** The name of the node affected by this animation. The node
+     *  must exist and it must be unique.*/
+    pub node_name: Box<str>,
+
+    /** The position keys of this animation channel. Positions are
+     * specified as 3D vector. The array is mNumPositionKeys in size.
+     *
+     * If there are position keys, there will also be at least one
+     * scaling and one rotation key.*/
+    pub position_keys: Vec<AiVectorKey>,
+
+    /** The rotation keys of this animation channel. Rotations are
+     *  given as quaternions,  which are 4D vectors. The array is
+     *  mNumRotationKeys in size.
+     *
+     * If there are rotation keys, there will also be at least one
+     * scaling and one position key. */
+    pub rotation_keys: Vec<AiQuatKey>,
+
+    /** The scaling keys of this animation channel. Scalings are
+     *  specified as 3D vector. The array is mNumScalingKeys in size.
+     *
+     * If there are scaling keys, there will also be at least one
+     * position and one rotation key.*/
+    pub scaling_keys: Vec<AiVectorKey>,
+
+    /** Defines how the animation behaves before the first
+     *  key is encountered.
+     *
+     *  The default value is aiAnimBehaviour_DEFAULT (the original
+     *  transformation matrix of the affected node is used).*/
+    pub pre_state: AiAnimBehaviour,
+
+    /** Defines how the animation behaves after the last
+     *  key was processed.
+     *
+     *  The default value is aiAnimBehaviour_DEFAULT (the original
+     *  transformation matrix of the affected node is taken).*/
+    pub post_state: AiAnimBehaviour,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct AiMeshAnim {
+    pub name: Box<str>,
+    pub key_frames: Vec<AiMeshKey>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct AiMeshMorphAnim {
+    pub name: Box<str>,
+    pub key_frames: Vec<AiMeshMorphKey>,
+}
