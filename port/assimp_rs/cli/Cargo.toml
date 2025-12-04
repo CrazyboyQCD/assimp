@@ -1,0 +1,22 @@
+[package]
+name = "rassimp-cli"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "rassimp-cli"
+path = "src/main.rs"
+doc = false
+
+[dependencies]
+rassimp = { workspace = true }
+clap = { workspace = true, features = [
+    "std",
+    "color",
+    "help",
+    "usage",
+    "error-context",
+    "suggestions",
+    "derive",
+] }
+thiserror = { workspace = true }

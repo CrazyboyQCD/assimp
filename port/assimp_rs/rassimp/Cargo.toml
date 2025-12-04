@@ -1,0 +1,76 @@
+[package]
+name = "rassimp"
+version = "0.1.0"
+edition = "2024"
+description = "Rust for Assimp"
+authors = ["ASSIMP Developers <assimp-discussions@lists.sourceforge.net>"]
+rust-version = "1.90.0"
+license-file = "../LICENSE.txt"
+readme = "README.md"
+
+[lib]
+crate-type = ["lib"]
+path = "src/lib.rs"
+
+[dependencies]
+bitflags = { workspace = true }
+byteorder = { workspace = true }
+encoding_rs = { workspace = true, features = ["alloc"] }
+foldhash = { version = "0.2", default-features = false, optional = true }
+glam = { workspace = true }
+gltf = { version = "1.4.1", optional = true, default-features = false, features = [
+    "KHR_lights_punctual",
+    "KHR_materials_transmission",
+    "KHR_materials_specular",
+    "KHR_materials_ior",
+    "KHR_materials_volume",
+    "KHR_materials_unlit",
+    "KHR_materials_emissive_strength",
+    "KHR_texture_transform",
+    "extras",
+    "extensions",
+    "image",
+    "import",
+    "names",
+    "utils",
+] }
+indexmap = { workspace = true }
+lexical-parse-float = { workspace = true }
+thiserror = { workspace = true }
+zlib-rs = { version = "0.5.2", optional = true, default-features = false }
+
+[features]
+default = [
+    "std",
+    "zlib_rust_allocator",
+    "compression",
+
+    # formats
+    "mmd_format",
+    "x_format",
+    "gltf_format",
+]
+std = ["byteorder/std", "glam/std", "indexmap/std"]
+zlib_rust_allocator = ["zlib-rs?/rust-allocator"]
+zlib_c_allocator = ["zlib-rs?/c-allocator"]
+zlib_custom_allocator = []
+double_precision = []
+libm = ["glam/libm"]
+compression = ["zlib-rs"]
+
+glam_no_std_libm = ["glam/nostd-libm"]
+
+# postprocess
+armature_populate = []
+
+# All formats
+mmd_format = []
+x_format = []
+gltf_format = ["dep:gltf"]
+
+swig = []
+hashbrown = []
+foldhash = ["dep:foldhash"]
+
+[profile.release]
+debug = true

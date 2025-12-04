@@ -1,0 +1,12 @@
+[package]
+name = "rassimp_viewer"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "rassimp-viewer"
+path = "src/main.rs"
+doc = false
+
+[dependencies]
+rassimp = { workspace = true }
